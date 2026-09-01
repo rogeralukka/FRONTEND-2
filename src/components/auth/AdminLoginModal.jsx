@@ -8,8 +8,8 @@ export const AdminLoginModal = () => {
   const { navigateTo } = useData();
   const { t } = useLang();
 
-  const [adminId, setAdminId] = useState('admin_001');
-  const [password, setPassword] = useState('admin123');
+  const [adminId, setAdminId] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,7 +18,7 @@ export const AdminLoginModal = () => {
     return null;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!adminId.trim() || !password.trim()) {
       setError("Please enter both Admin ID and Password");
@@ -27,15 +27,18 @@ export const AdminLoginModal = () => {
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      const res = loginAdmin({ adminId, password });
+    try {
+      const res = await loginAdmin({ adminId, password });
       setLoading(false);
-      if (res.success) {
+      if (res && res.success) {
         navigateTo('admin-overview');
       } else {
-        setError(res.error || "Authentication failed");
+        setError(res?.error || "Invalid Admin ID or Password");
       }
-    }, 600);
+    } catch (err) {
+      setLoading(false);
+      setError("Unable to connect to server");
+    }
   };
 
   return (
