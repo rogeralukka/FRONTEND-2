@@ -1,3 +1,4 @@
+import { api } from '../../services/api';
 import React from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -22,8 +23,22 @@ export const ShareEligibility = () => {
     showToast(t('linkCopiedToast'));
   };
 
-  const handleDownloadPdf = () => {
-    window.print();
+  const handleDownloadPdf = async () => {
+    try {
+      showToast('Generating official PDF certificate...');
+      const blob = await api.downloadPdfReport();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `YojnaSetu_Eligibility_${(userProfile.name || 'Citizen').replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showToast('Official PDF downloaded successfully!');
+    } catch (e) {
+      window.print();
+    }
   };
 
   return (
